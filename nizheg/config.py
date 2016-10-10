@@ -4,5 +4,5 @@ DEBUG=True
 SECRET_KEY='dev_key'
 USERNAME='admin'
 PASSWORD='default'
-HOST='192.168.140.12'
+HOST='0.0.0.0'
 PORT=9000
