@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+{% block body %}
+Hello my name is {{model.name}}!<br>
+I'm {{model.age}} years old!<br>
+I live in {{model.district}} district<br>
+
+if you want to contact me phone at 
+
+<br><br>
+<SCRIPT TYPE="text/javascript">
+  function popup(mylink, windowname) {
+    if (! window.focus)return true;
+    var href;
+    if (typeof(mylink) == 'string') href=mylink;
+    else href=mylink.href;
+    window.open(href, windowname, 'width=1000,height=800');
+
+    return false;
+  }
+</SCRIPT>
+
+{% for i in photo %}
+<A HREF="/photo/{{ i[2] }}" onClick="return popup(this, 'notes')"><img src="/uploads/{{ i[2] }}" alt="photo" style="width:100px;height:80px;"/img></A>
+{% endfor %}
+
+{% if session.logged_in %}
+<br>
+If you want to edit it, go to  <a href="{{model.id}}/edit">here </a>
+
+{% endif  %}
+
+{% endblock %}

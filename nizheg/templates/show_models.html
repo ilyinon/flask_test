@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% block body %}
+  {% if session.logged_in %}
+    <form action="{{ url_for('add_model') }}" method=post class=add-model>
+      <dl>
+
+        <dt>Name: <input type=text size=30 name=name>
+        <dt>Age:  <input type=number size=2 name=age>
+        <dt>District: <input type=text size=10 name=district>
+        
+        <dd><input type=submit value=Create model>
+      </dl>
+    </form>
+  {% endif %}
+  <ul class=models>
+  {% for model in models %}
+
+<table> 
+ <tr>
+    <td  style="vertical-align:top"><b><a href="model/{{model[0]}}">{{ model[1] }}</a></b> {{ model[2] }} {{model[3]}}  <td>
+    <td><img src="/uploads/{{ model[6] }}" alt="photo" style="width:100px;height:80px;"><br><br>  </td>
+ </tr>
+</table>
+  {% else %}
+    <li><em>Unbelievable.  No entries here so far</em>
+  {% endfor %}
+  </ul>
+{% endblock %}

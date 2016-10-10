@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+{% block body %}
+  {% if session.logged_in %}
+    <form action="{{ url_for('edit_model') }}" method=post class=edit-model>
+        <dl> <input name=id value={{model.id}} type=hidden >
+        <dt>Current Name: {{ model.name }}
+        <dt> New name: <input type=text size=30 name=name>
+       
+        <dt> Current age: {{ model.age }}
+        <dt> New age:  <input type=number size=2 name=age>
+        <dt> Current district {{model.district}} <dd>
+         <dt>New District: <input type=text size=10 name=district>
+        <dt> 
+        <dd><input type=submit value=Update model>
+      </dl>
+    </form>
+
+    <form action="{{ url_for('delete_model') }}" method=post class=delete-model>
+        <dl> <input name=id value={{model.id}} type=hidden >
+        <dt>Current Name: {{ model.name }}
+        <dt> Current age: {{ model.age }}
+        <dt> Current district {{model.district}} <dd>
+        <dd><input type=submit value=Delete model>
+      </dl>
+    </form>
+    <form action="upload" method=post enctype=multipart/form-data >
+      <p><input type=file name=file>
+         <input type=submit value=Upload>
+    </form>
+    
+
+
+  {% endif %}
+
+  <ul class=models>
+    <li><h2>{{ model.name }}</h2>{{ model.age|safe }} {{model.district}}
+  </ul>
+{% endblock %}

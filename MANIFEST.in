@@ -1,0 +1,2 @@
+recursive-include nizheg/templates *
+recursive-include nigheg/static *

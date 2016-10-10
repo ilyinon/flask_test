@@ -1,0 +1,6 @@
+SQLAlchemy
+sqlite3
+os
+json
+flask
+werkzeug
