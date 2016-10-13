@@ -7,9 +7,8 @@ from  sqlalchemy import *
 import config
 
 
-
-db = create_engine('sqlite:///testdb.sqlite')
-metadata = MetaData(db)
+#db = create_engine('sqlite:///testdb.sqlite')
+#metadata = MetaData(db)
 
 app = Flask(__name__)
 app.config.from_object('config.DevConfig')

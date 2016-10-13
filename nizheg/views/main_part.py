@@ -1,10 +1,20 @@
 from flask import *
 from werkzeug.utils import secure_filename
+from ..models import engine, Model, District, Image
+
+from sqlalchemy.engine import Engine
+from sqlalchemy.orm import sessionmaker, class_mapper
+from sqlalchemy.sql.expression import func
+
+Session = sessionmaker(bind=engine)
+
+db_session = Session()
+
+
 import uuid
 import os
 
 from nizheg import app
-from ..models import *
 
 
 
@@ -19,21 +29,25 @@ def allowed_file(filename):
 @app.route('/')
 def show_models():
 
-  j = join(model_table, image_table,
-           model_table.c.id == image_table.c.model_id)
-  stmt = select([model_table, image_table]).select_from(j).order_by(func.random()).group_by(model_table.c.id).limit(10)
-  models=stmt.execute().fetchall()
-  return render_template('show_models.html', models=models)
+  userList = db_session.query(Model.id, Model.name, Model.age, District.name, Image.filename).\
+             join(District, Model.district ==  District.id).\
+             join(Image, Model.id == Image.model_id).group_by(Model.id).limit(5).all()
+
+  print userList
+
+  return render_template('show_models.html', models=userList)
 
 @app.route('/add', methods=['POST'])
 def add_model():
   if not session.get('logged_in'):
     abort(401)
-  stmt = model_table.insert()
-  stmt.execute(   name     = request.form['name'],
-                  age      = request.form['age'],
-                  district = request.form['district']
-)
+
+  new_model = Model(name     = request.form['name'], 
+                    age      = request.form['age'],
+                    district = request.form['district'] 
+  )
+  db_session.add(new_model)
+  db_session.commit()
 
   flash('New model was successfully posted')
   return redirect(url_for('show_models'))
@@ -55,9 +69,9 @@ def edit_model():
     model_list['district'] =  model_district
   if model_age:
     model_list['age'] =  model_age
-  stmt = model_table.update( whereclause = model_table.c.id == model_id, 
-    values = model_list )
-  stmt.execute() 
+#  stmt = model_table.update( whereclause = model_table.c.id == model_id, 
+#    values = model_list )
+#  stmt.execute() 
   flash('Model info was successful changed')
   return redirect(url_for('show_models'))
 
@@ -76,8 +90,10 @@ def delete_model():
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
   error = None
-  stmt = model_table.select()
-  models=stmt.execute()
+  userList = Model.query.join(District, Model.district==District.id)
+
+#  stmt = model_table.select()
+#  models=stmt.execute()
   if request.method == 'POST':
     if request.form['username'] != app.config['USERNAME'] or request.form['password'] != app.config['PASSWORD']:
       error = 'Invalid username or password'
@@ -85,34 +101,41 @@ def login():
       session['logged_in'] = True
       flash('You were logged in')
       return redirect(url_for('show_models'))
-  return render_template('login.html', error=error, models=models)
+  return render_template('login.html', error=error, models=userList)
 
 @app.route('/model/<int:model_id>',methods=['GET'])
-def get_mode(model_id):
-  stmt = model_table.select( model_table.c.id == model_id )
-  model = stmt.execute().fetchall()
+def get_model(model_id):
 
-  photo = image_table.select( image_table.c.model_id == model_id ) 
-  photo_list = photo.execute().fetchall()
-  try: 
-    model
-    if len(model) == 0:
+  userList = db_session.query(Model.name, Model.age, Model.district, District.name, Model.id).\
+             join(District, Model.district ==  District.id).\
+             filter(Model.id == model_id).all()
+
+  photo_list = db_session.query(Image.filename).join(Model, Model.id == Image.model_id).all()
+  try:
+    userList
+    if len(userList) == 0:
       return redirect(url_for('show_models'))
   except:
-   return redirect(url_for('show_models'))
-  return render_template('model.html', model=model[0], photo = photo_list  )
+    pass
+
+  return render_template('model.html', model=userList[0], photo = photo_list  )
 
 @app.route('/model/<int:model_id>/edit', methods=["GET", "POST"])
 def edit_model_page(model_id):
   if not session.get('logged_in'):
     abort(401)
-  stmt = model_table.select( model_table.c.id == model_id )
-  model = stmt.execute().fetchall()
+  userList = db_session.query(Model.name, Model.age, Model.district, District.name, Model.id).\
+              join(District, Model.district ==  District.id).\
+              filter(Model.id == model_id).all()
+#  stmt = model_table.select( model_table.c.id == model_id )
+#  model = stmt.execute().fetchall()
+  
+
   try:
-    model[0]
+    userList[0]
   except:
    return redirect(url_for('show_models'))
-  return render_template('edit_model.html', model=model[0])
+  return render_template('edit_model.html', model=userList[0])
 
 @app.route('/photo/<photo_id>', methods=['GET'])
 def photo(photo_id):
@@ -122,8 +145,10 @@ def photo(photo_id):
 @app.route('/model/<int:model_id>/upload', methods=['GET','POST'])
 def upload(model_id):
   file = request.files['file']
-  stmt = model_table.select( model_table.c.id == model_id )
-  model = stmt.execute().fetchall()
+  model_list = db_session.query(Model.name, Model.age, Model.district, District.name, Model.id).\
+               join(District, Model.district ==  District.id).\
+               filter(Model.id == model_id).all()
+
   if 'file' not in request.files:
     flash('No photo here')
     return redirect('edit_model.html')
@@ -134,15 +159,33 @@ def upload(model_id):
     filename_orig = secure_filename(file.filename)
     filename = str(uuid.uuid4())
     file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-    stmt = image_table.insert()
-    stmt.execute( model_id = model[0].id,
-                  filename     = filename,
-                  desc      = "currently_stub",
-                  filename_orig = filename_orig
+
+    new_image = Image(model_id = model_id,
+                     filename = filename,
+                     filename_orig  = filename_orig
     )
+    db_session.add(new_image)
+    db_session.commit()
+
 
     flash('Photo  was uploaded')
-    return render_template('edit_model.html', model = model[0])
+    return  render_template('edit_model.html', model=model_list[0])
+
+@app.route('/admin', methods=['GET'])
+def admin_page():
+  districtList = db_session.query(District.id, District.name).order_by(District.id).all()
+
+
+  return render_template('admin.html', districts=districtList)
+
+@app.route('/edit_district', methods =['POST'])
+def edit_district():
+
+  new_district = District(name     = request.form['district']   )
+  db_session.add(new_district)
+  db_session.commit()
+  return redirect(url_for('admin_page'))
+  
 
 @app.route('/logout')
 def logout():

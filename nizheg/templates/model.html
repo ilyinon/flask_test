@@ -1,8 +1,8 @@
 {% extends "layout.html" %}
 {% block body %}
-Hello my name is {{model.name}}!<br>
-I'm {{model.age}} years old!<br>
-I live in {{model.district}} district<br>
+Hello my name is {{model[0]}}!<br>
+I'm {{model[1]}} years old!<br>
+I live in district {{model[3]}}<br>
 
 if you want to contact me phone at 
 
@@ -20,12 +20,12 @@ if you want to contact me phone at
 </SCRIPT>
 
 {% for i in photo %}
-<A HREF="/photo/{{ i[2] }}" onClick="return popup(this, 'notes')"><img src="/uploads/{{ i[2] }}" alt="photo" style="width:100px;height:80px;"/img></A>
+<A HREF="/photo/{{ i[0] }}" onClick="return popup(this, 'notes')"><img src="/uploads/{{ i[0] }}" alt="photo" style="width:100px;height:80px;"/img></A>
 {% endfor %}
 
 {% if session.logged_in %}
 <br>
-If you want to edit it, go to  <a href="{{model.id}}/edit">here </a>
+If you want to edit it, go to  <a href="{{model[4]}}/edit">here </a>
 
 {% endif  %}
 

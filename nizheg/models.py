@@ -1,51 +1,48 @@
-from sqlite3    import *
-from sqlalchemy import *
-from nizheg     import metadata
+from sqlalchemy import Table, Column, Integer, String, ForeignKey
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship, backref
+import os
+import sys
 
-model_table = Table(
-  'model', metadata,
-  Column('id', Integer, primary_key=True),
-  Column('name', Unicode(50, convert_unicode=False), nullable=False),
-  Column('age', Integer, CheckConstraint('age >= 18 and age < 60')),
-  Column('district', Unicode(255, convert_unicode=False)),
-)
+Base = declarative_base()
 
-user_table = Table(
-  'user', metadata,
-  Column('id', Integer, primary_key=True),
-  Column('username', Unicode(20, convert_unicode=False), nullable=False),
-  Column('password', Unicode(50, convert_unicode=False), nullable=False),
-  Column('is_enabled', Boolean),
-  Column('model_id', Integer, ForeignKey('model.id', ondelete="CASCADE"))
-)
 
-role_table = Table(
-  'role', metadata,
-  Column('id', Integer, primary_key=True),
-  Column('name', Unicode(50, convert_unicode=False), unique=True)
-) 
+basedir = os.path.abspath(os.path.dirname(__file__))
+
+class Model(Base):
+  __tablename__ = 'model'
+  id   = Column(Integer, primary_key=True)
+  name = Column(String(50))
+  age  = Column(Integer)
+  district = Column(Integer, ForeignKey('district.id'))
+
+  def __repr__(self):
+    return "<Model(name='%s', age='%s', district='%s')>" % (self.name, self.age, self.district)
+
+
+class District(Base):
+  __tablename__ = 'district'
+  id   = Column(Integer, primary_key = True)
+  name = Column(String(50), unique=True)
   
-userroles_table = Table(
-  'userroles', metadata,
-  Column('id', Integer, primary_key=True),
-  Column('user_id', Integer, ForeignKey('user.id', ondelete="CASCADE")),
-  Column('role_id', Integer, ForeignKey('role.id', ondelete="CASCADE"))
-)
+  def __repr__(self):
+    return '<Post %r>' % (self.name)
 
-district_table = Table (
-  'district', metadata, 
-  Column('id', Integer, primary_key=True),
-  Column('district_name', Unicode(50, convert_unicode=False),
-    nullable=False)
-)
 
-image_table = Table ( 
-  'images', metadata,
-  Column('id', Integer, primary_key = True), 
-  Column('model_id', Integer, ForeignKey('model.id', ondelete="CASCADE")),
-  Column('filename', Unicode(50, convert_unicode=False)),
-  Column('desc', Unicode(200, convert_unicode=False)),
-  Column('filename_orig', Unicode(50, convert_unicode=False))
-)
+class Image(Base):
+  __tablename__ = 'image'
+  id            = Column(Integer, primary_key = True)
+  model_id      = Column(Integer, ForeignKey('model.id'))
+  filename      = Column(String(200))
+  filename_orig = Column(String(200))
 
-metadata.create_all()
+  def __repr__(self):
+    return '<Image %r>' % (self.filename_orig)
+
+
+
+from sqlalchemy.engine import Engine
+from sqlalchemy import create_engine
+engine = create_engine('sqlite:///' + os.path.join(basedir, 'app2.db'), echo=True)
+Base.metadata.create_all(engine)
+
