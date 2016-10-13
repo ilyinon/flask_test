@@ -110,7 +110,7 @@ def get_model(model_id):
              join(District, Model.district ==  District.id).\
              filter(Model.id == model_id).all()
 
-  photo_list = db_session.query(Image.filename).join(Model, Model.id == Image.model_id).all()
+  photo_list = db_session.query(Image.filename).filter(Image.model_id == model_id).all()
   try:
     userList
     if len(userList) == 0:
