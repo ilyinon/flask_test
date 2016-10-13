@@ -90,7 +90,7 @@ def delete_model():
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
   error = None
-  userList = Model.query.join(District, Model.district==District.id)
+#  userList = Model.query.join(District, Model.district==District.id)
 
 #  stmt = model_table.select()
 #  models=stmt.execute()
@@ -101,7 +101,7 @@ def login():
       session['logged_in'] = True
       flash('You were logged in')
       return redirect(url_for('show_models'))
-  return render_template('login.html', error=error, models=userList)
+  return render_template('login.html', error=error)
 
 @app.route('/model/<int:model_id>',methods=['GET'])
 def get_model(model_id):
