@@ -56,24 +56,24 @@ def add_model():
 def edit_model():
   if not session.get('logged_in'):
     abort(401)
-  model_id = request.form['id']
-  model_name = request.form['name']
-  model_age = request.form['age']
-  model_district = request.form['district']
 
-  model_list = {}
+  if request.form['name']:
+    updated_attribute = { Model.name: request.form['name']}
+    db_session.query(Model).filter(Model.id == request.form['id']).update(updated_attribute)
+  elif request.form['age']:
+    updated_attribute = { Model.age: request.form['age']}
+    db_session.query(Model).filter(Model.id == request.form['id']).update(updated_attribute)
+  elif request.form['district']:
+    updated_attribute = { Model.district: request.form['district']}
+    db_session.query(Model).filter(Model.id == request.form['id']).update(updated_attribute)
+  
+  db_session.commit()
 
-  if model_name:
-    model_list['name'] =  model_name
-  if model_district:
-    model_list['district'] =  model_district
-  if model_age:
-    model_list['age'] =  model_age
-#  stmt = model_table.update( whereclause = model_table.c.id == model_id, 
-#    values = model_list )
-#  stmt.execute() 
-  flash('Model info was successful changed')
-  return redirect(url_for('show_models'))
+
+  flash('Model info was successful updated')
+  return redirect('/model/'+request.form['id']+'/edit')
+
+
 
 @app.route('/delete', methods=['POST'])
 def delete_model():
