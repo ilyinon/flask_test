@@ -142,10 +142,19 @@ def photo(photo_id):
 
 @app.route('/model/<int:model_id>/upload', methods=['GET','POST'])
 def upload(model_id):
+
+  photo_count = db_session.query(Image.filename).\
+                filter(Image.model_id == model_id).count()
+  print photo_count
+  if photo_count >= 5:
+    flash('You are reached limit of 5 photos!\n For adding new you should delete old one')
+    return redirect('/model/'+str(model_id)+'/edit')
+
   file = request.files['file']
-  model_list = db_session.query(Model.name, Model.age, Model.district, District.name, Model.id).\
-               join(District, Model.district ==  District.id).\
-               filter(Model.id == model_id).all()
+#  model_list = db_session.query(Model.name, Model.age, Model.district, District.name, Model.id).\
+#               join(District, Model.district ==  District.id).\
+#               filter(Model.id == model_id).all()
+
 
   if 'file' not in request.files:
     flash('No photo here')
@@ -167,7 +176,7 @@ def upload(model_id):
 
 
     flash('Photo  was uploaded')
-    return  render_template('edit_model.html', model=model_list[0])
+    return redirect('/model/'+str(model_id)+'/edit')
 
 @app.route('/admin', methods=['GET'])
 def admin_page():
