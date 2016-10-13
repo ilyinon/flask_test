@@ -127,15 +127,13 @@ def edit_model_page(model_id):
   userList = db_session.query(Model.name, Model.age, Model.district, District.name, Model.id).\
               join(District, Model.district ==  District.id).\
               filter(Model.id == model_id).all()
-#  stmt = model_table.select( model_table.c.id == model_id )
-#  model = stmt.execute().fetchall()
-  
+  districtList = db_session.query(District.id, District.name).order_by(District.id).all()
 
   try:
     userList[0]
   except:
    return redirect(url_for('show_models'))
-  return render_template('edit_model.html', model=userList[0])
+  return render_template('edit_model.html', model=userList[0], districts = districtList)
 
 @app.route('/photo/<photo_id>', methods=['GET'])
 def photo(photo_id):

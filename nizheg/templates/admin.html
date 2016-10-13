@@ -1,6 +1,23 @@
 {% extends "layout.html" %}
 {% block body %}
   {% if session.logged_in %}
+
+Добавить новую модель: <br>
+    <form action="{{ url_for('add_model') }}" method=post class=add-model>
+      <dl>
+
+        <dt>Name: <input type=text name=name pattern="[А-Яа-яЁё]{3,20}">
+        <dt>Age:  <input type=number name=age min="18" max="59">
+        <dt>District: <select name=district>
+    {%for district in districts %}
+                      <option value="{{district[0]}}">{{district[1]}}</option>
+    {% endfor %}
+                      </select>
+        <dd><input type=submit value="Добавить модель">
+      </dl>
+    </form>
+
+
   Список доступных районов:<br>
   {% for district in districts %}
    {{district[0]}}: {{district[1]}} <br>

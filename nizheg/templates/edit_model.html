@@ -3,16 +3,18 @@
   {% if session.logged_in %}
     <form action="{{ url_for('edit_model') }}" method=post class=edit-model>
         <dl> <input name=id value={{model[4]}} type=hidden >
-        <dt>Current Name: {{ model[0] }}
-        <dt> New name: <input type=text size=30 name=name>
-       
-        <dt> Current age: {{ model[1] }}
-        <dt> New age:  <input type=number size=2 name=age>
-        <dt> Current district {{model[3]}} <dd>
-         <dt>New District: <input type=text size=10 name=district>
-        <dt> 
-        <dd><input type=submit value=Update model>
+        <dt>Имя <b>{{ model[0] }}</b> изменить на:  
+         <input type=text name=name pattern="[А-Яа-яЁё]{3,20}">
+        <dt>Текущий возраст <b>{{ model[1] }}</b> изменить на:
+        <input type=number name=age min="18" max="59">
+        <dt> Текущий район <b>{{model[3]}}</b> изменить на: 
+         <select name=district>
+    {%for district in districts %}
+                      <option value="{{district[0]}}">{{district[1]}}</option>
+    {% endfor %} 
+        <dt><dt><br><br> 
       </dl>
+       <input type=submit value="Обновить данные">
     </form>
 
     <form action="{{ url_for('delete_model') }}" method=post class=delete-model>
