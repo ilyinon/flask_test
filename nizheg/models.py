@@ -1,4 +1,4 @@
-from sqlalchemy import Table, Column, Integer, String, ForeignKey
+from sqlalchemy import Table, Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, backref
 import os
@@ -38,6 +38,30 @@ class Image(Base):
 
   def __repr__(self):
     return '<Image %r>' % (self.filename_orig)
+
+
+class Role(Base):
+  __tablename__  = 'role'
+  id         = Column(Integer, primary_key = True)
+  rolename   = Column(String(20))
+
+  def __repr__(self):
+    return '<Rolename %r>' % (self.rolename)
+
+
+
+class User(Base):
+  __tablename__ = 'user'
+  id            = Column(Integer, primary_key = True)
+  username      = Column(String(20))
+  password      = Column(String(20))
+  email         = Column(String(100))
+  registered_on = Column(DateTime)
+  role_id       = Column(Integer, ForeignKey('role.id'))
+
+  def __repr__(self):
+    return '<Username %r>' % (self.username)
+
 
 
 
