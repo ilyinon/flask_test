@@ -15,31 +15,25 @@
         <dt><dt><br><br> 
       </dl>
        <input type=submit value="Обновить данные">
-    </form>
-
-    <form action="{{ url_for('delete_model') }}" method=post class=delete-model>
-        <dl> <input name=id value={{model[4]}} type=hidden >
-        <dt>Current Name: {{ model[0] }}
-        <dt> Current age: {{ model[1] }}
-        <dt> Current district {{model[3]}} <dd>
-        <dd><input type=submit value=Delete model>
-      </dl>
-    </form>
+    </form> 
+   <dl>   Добавить новую фотографию:
     <form action="upload" method=post enctype=multipart/form-data >
       <p><input type=file name=file>
-         <input type=submit value=Upload>
+         <input type=submit value="Загрузить фотографию">
     </form>
   {% endif %}
-
+<br><br><br>
  {% for image in images %}
-    <A HREF="/photo/{{ image[0] }}" onClick="return popup(this, 'notes')"><img src="/uploads/{{ image[0] }}" alt="photo" style="width:100px;height:80px;"/img></A>
     <form action="{{ url_for('delete_image', filename=image[0])}}"  method=post class=delete-photo>
-    <input type=submit value="Удалить фотографию">
+<A HREF="/photo/{{ image[0] }}" onClick="return popup(this, 'notes')"><img src="/uploads/{{ image[0] }}" alt="photo" style="width:100px;height:80px;"/img></A>
+      <input type=submit value="Удалить фотографию">
     </form>
  {% endfor %}
 
+<br><br><br>
+<form action="{{ url_for('delete_model') }}" method=post class=delete-model>
+      <dl> <input name=id value={{model[4]}} type=hidden >
+      <dd>Полностью: <input type=submit value="Удалить текущую модель">
+</form>
 
-  <ul class=models>
-    <li><h2>{{ model[0] }}</h2>{{ model[1]|safe }} {{model[3]}}
-  </ul>
 {% endblock %}
