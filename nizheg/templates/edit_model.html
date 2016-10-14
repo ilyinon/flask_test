@@ -29,10 +29,15 @@
       <p><input type=file name=file>
          <input type=submit value=Upload>
     </form>
-    
-
-
   {% endif %}
+
+ {% for image in images %}
+    <A HREF="/photo/{{ image[0] }}" onClick="return popup(this, 'notes')"><img src="/uploads/{{ image[0] }}" alt="photo" style="width:100px;height:80px;"/img></A>
+    <form action="{{ url_for('delete_image', filename=image[0])}}"  method=post class=delete-photo>
+    <input type=submit value="Удалить фотографию">
+    </form>
+ {% endfor %}
+
 
   <ul class=models>
     <li><h2>{{ model[0] }}</h2>{{ model[1]|safe }} {{model[3]}}

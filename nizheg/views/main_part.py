@@ -33,8 +33,6 @@ def show_models():
              join(District, Model.district ==  District.id).\
              join(Image, Model.id == Image.model_id).group_by(Model.id).limit(5).all()
 
-  print userList
-
   return render_template('show_models.html', models=userList)
 
 @app.route('/add', methods=['POST'])
@@ -120,20 +118,26 @@ def get_model(model_id):
 
   return render_template('model.html', model=userList[0], photo = photo_list  )
 
+
 @app.route('/model/<int:model_id>/edit', methods=["GET", "POST"])
 def edit_model_page(model_id):
+
   if not session.get('logged_in'):
     abort(401)
+
   userList = db_session.query(Model.name, Model.age, Model.district, District.name, Model.id).\
               join(District, Model.district ==  District.id).\
               filter(Model.id == model_id).all()
-  districtList = db_session.query(District.id, District.name).order_by(District.id).all()
-
   try:
     userList[0]
   except:
-   return redirect(url_for('show_models'))
-  return render_template('edit_model.html', model=userList[0], districts = districtList)
+    return redirect(url_for('show_models'))
+
+  DistrictList = db_session.query(District.id, District.name).order_by(District.id).all()
+  ImageList = db_session.query(Image.filename).filter(Image.model_id == model_id).all()
+
+  return render_template('edit_model.html', model=userList[0], districts = DistrictList, images = ImageList)
+
 
 @app.route('/photo/<photo_id>', methods=['GET'])
 def photo(photo_id):
@@ -143,18 +147,13 @@ def photo(photo_id):
 @app.route('/model/<int:model_id>/upload', methods=['GET','POST'])
 def upload(model_id):
 
-  photo_count = db_session.query(Image.filename).\
+  ImagesCount = db_session.query(Image.filename).\
                 filter(Image.model_id == model_id).count()
-  print photo_count
-  if photo_count >= 5:
+  if ImagesCount >= 5:
     flash('You are reached limit of 5 photos!\n For adding new you should delete old one')
     return redirect('/model/'+str(model_id)+'/edit')
 
   file = request.files['file']
-#  model_list = db_session.query(Model.name, Model.age, Model.district, District.name, Model.id).\
-#               join(District, Model.district ==  District.id).\
-#               filter(Model.id == model_id).all()
-
 
   if 'file' not in request.files:
     flash('No photo here')
@@ -178,12 +177,12 @@ def upload(model_id):
     flash('Photo  was uploaded')
     return redirect('/model/'+str(model_id)+'/edit')
 
+
 @app.route('/admin', methods=['GET'])
 def admin_page():
   districtList = db_session.query(District.id, District.name).order_by(District.id).all()
+  return render_template('admin.html', districts = districtList)
 
-
-  return render_template('admin.html', districts=districtList)
 
 @app.route('/edit_district', methods =['POST'])
 def edit_district():
@@ -200,8 +199,20 @@ def logout():
   flash('You were logged out')
   return redirect(url_for('show_models'))
 
+
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
   return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
+
+@app.route('/delete_imagei<filename>', methods=['GET', 'POST'])
+def delete_image(filename):
+  if not os.path.exists("os.path.join(app.config['UPLOAD_FOLDER'], filename)"):
+    flash('image is not found')
+  else:
+    os.remove(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+  if db_session.query(Image).filter(Image.filename == filename).delete():
+    flash('record is deleted')
+  flash('Photo was deleted')
+  return redirect('/')
 
