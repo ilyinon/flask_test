@@ -67,6 +67,6 @@ class User(Base):
 
 from sqlalchemy.engine import Engine
 from sqlalchemy import create_engine
-engine = create_engine('sqlite:///' + os.path.join(basedir, 'app2.db'), echo=True)
+engine = create_engine('mysql://nizheg:nizheg@localhost/nizheg?charset=utf8', pool_recycle=3600)
 Base.metadata.create_all(engine)
 

@@ -11,8 +11,8 @@ import sys
 #from nizheg import app
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-engine = create_engine('sqlite:///' + os.path.join(basedir, 'app.db'), convert_unicode=True)
-db_session = scoped_session(sessionmaker(autocommit=False, autoflush=False,bind=engine))
+#engine = create_engine('mysql+mysqldb:///nizheg:nizheg@localhost/nizheg')
+db_session = scoped_session(sessionmaker(autocommit=False, autoflush=True, bind=engine))
 Base = declarative_base()
 Base.query = db_session.query_property()
 

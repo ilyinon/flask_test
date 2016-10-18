@@ -12,5 +12,4 @@ class Config(object):
 
 class DevConfig(Config):
   ENV='Development'
-  db_uri = 'sqlite:///' + os.path.join(basedir, 'app.db')
   SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, 'db_repository')
